@@ -58,14 +58,14 @@ async function startBot(usePairing = false, pairingPhone = null) {
         return;
     }
 
-    // ====== حدث QR ======
+    // ====== حدث الحالة + QR ======
     sock.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
         if (qr) {
             currentQR = await qrcode.toDataURL(qr);
             isConnected = false;
-            console.log('📷 QR Code جاهز — افتح http://localhost:3000/status');
+            console.log('📷 [BOT] QR Code جاهز للمسح');
         }
 
         if (connection === 'close') {
@@ -74,7 +74,7 @@ async function startBot(usePairing = false, pairingPhone = null) {
             connectedPhone = null;
             const code = lastDisconnect?.error?.output?.statusCode;
             const shouldReconnect = code !== DisconnectReason.loggedOut;
-            console.log('🔌 انقطع الاتصال — الكود:', code, '— إعادة المحاولة:', shouldReconnect);
+            console.log('🔌 [BOT] انقطع الاتصال — الكود:', code, '— إعادة المحاولة:', shouldReconnect);
             if (shouldReconnect) {
                 setTimeout(() => startBot(), 5000);
             }
@@ -84,10 +84,11 @@ async function startBot(usePairing = false, pairingPhone = null) {
             isConnected = true;
             currentQR = null;
             connectedPhone = sock.user?.id?.split(':')[0] || null;
-            console.log('✅ واتساب متصل! الرقم:', connectedPhone);
+            console.log('✅ [BOT] واتساب متصل! الرقم:', connectedPhone);
         }
     });
 
+    // حفظ الجلسة
     sock.ev.on('creds.update', saveCreds);
 
     // ====== استقبال الرسائل ======
@@ -110,9 +111,8 @@ async function startBot(usePairing = false, pairingPhone = null) {
                 ? `https://maps.google.com/?q=${msg.message.locationMessage.degreesLatitude},${msg.message.locationMessage.degreesLongitude}`
                 : null;
 
-            console.log(`📨 رسالة من ${phone}: ${text.substring(0, 60)}`);
+            console.log(`📨 [BOT] رسالة من ${phone}: ${text.substring(0, 60)}`);
 
-            // تجميع الرسائل لمدة 45 ثانية قبل المعالجة
             if (!messageBuffer[phone]) {
                 messageBuffer[phone] = { messages: [], location: null, timer: null };
             }
@@ -123,7 +123,7 @@ async function startBot(usePairing = false, pairingPhone = null) {
             messageBuffer[phone].timer = setTimeout(async () => {
                 await processOrder(phone, messageBuffer[phone]);
                 delete messageBuffer[phone];
-            }, 45000); // 45 ثانية
+            }, 45000); 
         }
     });
 }
