@@ -1,0 +1,4 @@
+bot/node_modules/
+bot/auth_info/
+*.log
+.DS_Store
