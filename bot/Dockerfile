@@ -8,11 +8,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# Install dependencies for canvas/qrcode if needed
+RUN apk add --no-cache libc6-compat
+
 # Copy bot files
 COPY . .
 
 # Expose port
 EXPOSE 3000
 
-# Start Bot! No need for PM2 inside Docker as docker acts as the process manager
-CMD ["npm", "start"]
+# Start Bot! 
+CMD ["node", "bot.js"]

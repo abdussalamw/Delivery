@@ -30,25 +30,32 @@ const DB_WEBHOOK = process.env.WEBHOOK_URL || 'http://localhost/Delivery/webhook
 
 // ====== تهيئة البوت ======
 async function startBot(usePairing = false, pairingPhone = null) {
-    const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
+    console.log(`[${new Date().toISOString()}] 🚀 بدء تشغيل البوت... وضع الاقتران: ${usePairing}`);
+    try {
+        const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
 
-    sock = makeWASocket({
-        logger: pino({ level: 'silent' }),
-        auth: state,
-        printQRInTerminal: !usePairing,
-        browser: ['Delivery Bot', 'Chrome', '1.0.0'],
-    });
+        sock = makeWASocket({
+            logger: pino({ level: 'info' }), // Changed from silent to info for debugging
+            auth: state,
+            printQRInTerminal: false, // Disabled deprecated option
+            browser: ['Delivery Bot', 'Chrome', '1.0.0'],
+        });
 
-    if (usePairing && pairingPhone && !sock.authState.creds.registered) {
-        setTimeout(async () => {
-            try {
-                const code = await sock.requestPairingCode(pairingPhone);
-                pairingCodePending = code;
-                console.log('✅ Pairing Code:', code);
-            } catch (e) {
-                console.error('❌ خطأ في طلب الكود:', e.message);
-            }
-        }, 3000);
+        if (usePairing && pairingPhone && !sock.authState.creds.registered) {
+            console.log(`[BOT] طلب كود الاقتران للرقم: ${pairingPhone}`);
+            setTimeout(async () => {
+                try {
+                    const code = await sock.requestPairingCode(pairingPhone);
+                    pairingCodePending = code;
+                    console.log('✅ Pairing Code:', code);
+                } catch (e) {
+                    console.error('❌ خطأ في طلب الكود:', e.message);
+                }
+            }, 3000);
+        }
+    } catch (err) {
+        console.error('❌ فشل في تهيئة Baileys:', err);
+        return;
     }
 
     // ====== حدث QR ======
