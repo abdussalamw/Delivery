@@ -35,9 +35,9 @@ async function startBot(usePairing = false, pairingPhone = null) {
         const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
 
         sock = makeWASocket({
-            logger: pino({ level: 'info' }), // Changed from silent to info for debugging
+            logger: pino({ level: 'info' }),
             auth: state,
-            printQRInTerminal: false, // Disabled deprecated option
+            printQRInTerminal: false,
             browser: ['Delivery Bot', 'Chrome', '1.0.0'],
         });
 
@@ -53,85 +53,86 @@ async function startBot(usePairing = false, pairingPhone = null) {
                 }
             }, 3000);
         }
+
+        // ====== حدث الحالة + QR ======
+        sock.ev.on('connection.update', async (update) => {
+            const { connection, lastDisconnect, qr } = update;
+
+            if (qr) {
+                currentQR = await qrcode.toDataURL(qr);
+                isConnected = false;
+                console.log('📷 [BOT] QR Code جاهز للمسح');
+            }
+
+            if (connection === 'close') {
+                isConnected = false;
+                currentQR = null;
+                connectedPhone = null;
+                const code = lastDisconnect?.error?.output?.statusCode;
+                const shouldReconnect = code !== DisconnectReason.loggedOut;
+                console.log('🔌 [BOT] انقطع الاتصال — الكود:', code, '— إعادة المحاولة:', shouldReconnect);
+                if (shouldReconnect) {
+                    setTimeout(() => startBot(), 5000);
+                }
+            }
+
+            if (connection === 'open') {
+                isConnected = true;
+                currentQR = null;
+                connectedPhone = sock.user?.id?.split(':')[0] || null;
+                console.log('✅ [BOT] واتساب متصل! الرقم:', connectedPhone);
+                console.log('🔗 Webhook URL:', DB_WEBHOOK);
+            }
+        });
+
+        // حفظ الجلسة
+        sock.ev.on('creds.update', saveCreds);
+
+        // ====== استقبال الرسائل ======
+        sock.ev.on('messages.upsert', async ({ messages, type }) => {
+            if (type !== 'notify') return;
+
+            for (const msg of messages) {
+                if (msg.key.fromMe) continue;
+                if (!msg.message) continue;
+
+                const from = msg.key.remoteJid;
+                if (from.endsWith('@g.us')) continue;
+
+                const phone = from.replace('@s.whatsapp.net', '');
+                const text = msg.message?.conversation
+                    || msg.message?.extendedTextMessage?.text
+                    || '';
+
+                const location = msg.message?.locationMessage
+                    ? `https://maps.google.com/?q=${msg.message.locationMessage.degreesLatitude},${msg.message.locationMessage.degreesLongitude}`
+                    : null;
+
+                console.log(`📨 [BOT] رسالة من ${phone}: ${text.substring(0, 60)}`);
+
+                if (!messageBuffer[phone]) {
+                    messageBuffer[phone] = { messages: [], location: null, timer: null };
+                }
+                if (text) messageBuffer[phone].messages.push(text);
+                if (location) messageBuffer[phone].location = location;
+
+                clearTimeout(messageBuffer[phone].timer);
+                messageBuffer[phone].timer = setTimeout(async () => {
+                    await processOrder(phone, messageBuffer[phone]);
+                    delete messageBuffer[phone];
+                }, 45000); 
+            }
+        });
+
     } catch (err) {
         console.error('❌ فشل في تهيئة Baileys:', err);
-        return;
     }
-
-    // ====== حدث الحالة + QR ======
-    sock.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect, qr } = update;
-
-        if (qr) {
-            currentQR = await qrcode.toDataURL(qr);
-            isConnected = false;
-            console.log('📷 [BOT] QR Code جاهز للمسح');
-        }
-
-        if (connection === 'close') {
-            isConnected = false;
-            currentQR = null;
-            connectedPhone = null;
-            const code = lastDisconnect?.error?.output?.statusCode;
-            const shouldReconnect = code !== DisconnectReason.loggedOut;
-            console.log('🔌 [BOT] انقطع الاتصال — الكود:', code, '— إعادة المحاولة:', shouldReconnect);
-            if (shouldReconnect) {
-                setTimeout(() => startBot(), 5000);
-            }
-        }
-
-        if (connection === 'open') {
-            isConnected = true;
-            currentQR = null;
-            connectedPhone = sock.user?.id?.split(':')[0] || null;
-            console.log('✅ [BOT] واتساب متصل! الرقم:', connectedPhone);
-        }
-    });
-
-    // حفظ الجلسة
-    sock.ev.on('creds.update', saveCreds);
-
-    // ====== استقبال الرسائل ======
-    sock.ev.on('messages.upsert', async ({ messages, type }) => {
-        if (type !== 'notify') return;
-
-        for (const msg of messages) {
-            if (msg.key.fromMe) continue;
-            if (!msg.message) continue;
-
-            const from = msg.key.remoteJid;
-            if (from.endsWith('@g.us')) continue; // تجاهل المجموعات
-
-            const phone = from.replace('@s.whatsapp.net', '');
-            const text = msg.message?.conversation
-                || msg.message?.extendedTextMessage?.text
-                || '';
-
-            const location = msg.message?.locationMessage
-                ? `https://maps.google.com/?q=${msg.message.locationMessage.degreesLatitude},${msg.message.locationMessage.degreesLongitude}`
-                : null;
-
-            console.log(`📨 [BOT] رسالة من ${phone}: ${text.substring(0, 60)}`);
-
-            if (!messageBuffer[phone]) {
-                messageBuffer[phone] = { messages: [], location: null, timer: null };
-            }
-            if (text) messageBuffer[phone].messages.push(text);
-            if (location) messageBuffer[phone].location = location;
-
-            clearTimeout(messageBuffer[phone].timer);
-            messageBuffer[phone].timer = setTimeout(async () => {
-                await processOrder(phone, messageBuffer[phone]);
-                delete messageBuffer[phone];
-            }, 45000); 
-        }
-    });
 }
 
 // ====== معالجة الطلب ======
 async function processOrder(phone, buffer) {
     const combined = buffer.messages.join('\n');
-    console.log(`⚙️ معالجة طلب من ${phone}: ${combined.substring(0, 80)}...`);
+    console.log(`⚙️ [BOT] معالجة طلب من ${phone}: ${combined.substring(0, 80)}...`);
 
     try {
         const res = await fetch(DB_WEBHOOK, {
@@ -148,21 +149,16 @@ async function processOrder(phone, buffer) {
 
         if (data.success && sock && isConnected) {
             const jid = phone + '@s.whatsapp.net';
-            // إرسال رسالة تأكيد للعميل
             await sock.sendMessage(jid, {
                 text: `✅ *تم استلام طلبك بنجاح!*\n\n📦 رقم الطلب: *${data.order_number}*\n💰 رسوم التوصيل: *${data.delivery_fee} ر.س*\n🛵 سيتم إرسال مندوب قريباً\n\n_نظام التوصيل الذكي_`
             });
         }
     } catch (e) {
-        console.error('❌ خطأ في معالجة الطلب:', e.message);
+        console.error('❌ [BOT] خطأ في معالجة الطلب وبحث الـ Webhook:', e.message);
     }
 }
 
-// ====================================================
 // ====== Express API Routes ======
-// ====================================================
-
-// الحالة العامة
 app.get('/status', (req, res) => {
     res.json({
         connected: isConnected,
@@ -173,12 +169,10 @@ app.get('/status', (req, res) => {
     });
 });
 
-// Ping
 app.get('/ping', (req, res) => {
     res.json({ ok: true, ts: Date.now() });
 });
 
-// QR Code
 app.get('/wa/qr', (req, res) => {
     if (isConnected) {
         return res.json({ connected: true, phone: connectedPhone });
@@ -189,24 +183,20 @@ app.get('/wa/qr', (req, res) => {
     res.json({ error: 'QR لم يتم توليده بعد — انتظر 10 ثوانٍ وأعد المحاولة' });
 });
 
-// حالة واتساب
 app.get('/wa/status', (req, res) => {
     res.json({ connected: isConnected, phone: connectedPhone });
 });
 
-// طلب Pairing Code
 app.post('/wa/pair', async (req, res) => {
     const { phone } = req.body;
     if (!phone) return res.status(400).json({ error: 'أدخل رقم الهاتف' });
 
     if (isConnected) {
-        return res.json({ error: 'البوت متصل بالفعل — افصله أولاً لإعادة الربط' });
+        return res.json({ error: 'البوت متصل بالفعل' });
     }
 
-    // إعادة تشغيل البوت مع وضع الـ Pairing
     await startBot(true, phone.replace(/[^0-9]/g, ''));
 
-    // انتظار الكود
     let waited = 0;
     const check = () => {
         if (pairingCodePending) {
@@ -215,13 +205,12 @@ app.post('/wa/pair', async (req, res) => {
             return res.json({ code });
         }
         waited += 500;
-        if (waited > 15000) return res.json({ error: 'انتهت مهلة الانتظار — أعد المحاولة' });
+        if (waited > 15000) return res.json({ error: 'انتهت مهلة الانتظار' });
         setTimeout(check, 500);
     };
     setTimeout(check, 3500);
 });
 
-// قطع الاتصال
 app.post('/wa/disconnect', async (req, res) => {
     if (sock) {
         await sock.logout();
@@ -232,7 +221,6 @@ app.post('/wa/disconnect', async (req, res) => {
     res.json({ ok: true });
 });
 
-// إرسال رسالة يدوية (للاختبار والإشعارات)
 app.post('/send', async (req, res) => {
     const { phone, message } = req.body;
     if (!sock || !isConnected) {
@@ -247,12 +235,8 @@ app.post('/send', async (req, res) => {
     }
 });
 
-// ====================================================
-// ====== تشغيل الخادم ======
-// ====================================================
 app.listen(PORT, () => {
     console.log(`🚀 Delivery Bot API يعمل على http://localhost:${PORT}`);
-    console.log('⚙️  جاري الاتصال بالواتساب...');
     startBot();
 });
 
