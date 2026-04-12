@@ -241,5 +241,5 @@ app.listen(PORT, () => {
 });
 
 process.on('uncaughtException', (err) => {
-    console.error('❌ خطأ غير متوقع:', err.message);
+    console.error('❌ خطأ غير متوقع:', err);
 });
