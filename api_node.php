@@ -30,6 +30,10 @@ function curl_get($url, $timeout=3) {
 switch($action) {
 
     case 'version':
+        if (getenv('BOT_URL')) {
+            echo json_encode(['ok'=>true, 'message'=>'✅ يعمل بنظام Docker — Node.js 22 (Alpine)']);
+            break;
+        }
         $v = shell_exec('node --version 2>&1');
         if(empty(trim($v)) || str_contains(strtolower($v),(string)'not recognized')) {
             echo json_encode(['ok'=>false, 'message'=>'❌ Node.js غير مُثبَّت. قم بتحميله من nodejs.org']);
