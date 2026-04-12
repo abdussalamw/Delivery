@@ -76,51 +76,7 @@ $status_ar = [
 require 'layout.php';
 ?>
 
-<style>
-.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-bottom:2rem; }
-.kpi { background:var(--glass); border:1px solid var(--border); border-radius:20px; padding:1.5rem; position:relative; overflow:hidden; transition:.3s; }
-.kpi:hover { border-color:rgba(255,255,255,.15); transform:translateY(-3px); box-shadow:0 12px 30px rgba(0,0,0,.25); }
-.kpi::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,transparent 60%,rgba(255,255,255,.02)); pointer-events:none; }
-.kpi-icon { font-size:2rem; position:absolute; left:1.5rem; top:1.25rem; opacity:.15; }
-.kpi-label { font-size:.8rem; color:var(--muted); margin-bottom:.5rem; text-transform:uppercase; letter-spacing:.5px; }
-.kpi-val { font-size:2.2rem; font-weight:900; line-height:1; }
-.kpi-sub { font-size:.8rem; margin-top:.4rem; }
-
-.dash-grid { display:grid; grid-template-columns:1fr 380px; gap:1.5rem; margin-bottom:1.5rem; }
-.dash-3col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.5rem; }
-@media(max-width:1200px) { .kpi-grid{grid-template-columns:repeat(2,1fr)} .dash-grid{grid-template-columns:1fr} .dash-3col{grid-template-columns:1fr} }
-
-.section-title { font-size:1rem; font-weight:700; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; }
-.section-title a { font-size:.8rem; color:var(--secondary); text-decoration:none; font-weight:400; }
-.section-title a:hover { color:var(--primary); }
-
-.order-row { display:flex; align-items:center; gap:1rem; padding:.85rem 0; border-bottom:1px solid rgba(255,255,255,.04); }
-.order-row:last-child { border-bottom:none; }
-.order-num { font-size:.75rem; color:var(--muted); min-width:80px; font-family:monospace; }
-.order-info { flex:1; }
-.order-name { font-size:.9rem; font-weight:600; }
-.order-loc { font-size:.75rem; color:var(--muted); }
-
-.driver-row { display:flex; align-items:center; gap:1rem; padding:.85rem 0; border-bottom:1px solid rgba(255,255,255,.04); }
-.driver-row:last-child { border-bottom:none; }
-.drv-avatar { width:40px; height:40px; border-radius:10px; background:var(--glass); border:1px solid var(--border); display:grid; place-items:center; font-weight:700; color:var(--secondary); flex-shrink:0; }
-.drv-bar-track { height:5px; background:rgba(255,255,255,.08); border-radius:3px; margin-top:4px; }
-.drv-bar-fill { height:5px; border-radius:3px; background:linear-gradient(90deg,var(--primary),var(--secondary)); }
-
-.status-dot-sm { width:8px; height:8px; border-radius:50%; display:inline-block; }
-.dot-online { background:var(--success); box-shadow:0 0 6px var(--success); }
-.dot-busy { background:var(--warning); box-shadow:0 0 6px var(--warning); }
-.dot-break { background:var(--muted); }
-.dot-offline { background:var(--danger); }
-
-.chart-bar-wrap { display:flex; align-items:flex-end; gap:.5rem; height:80px; }
-.chart-bar { flex:1; border-radius:6px 6px 0 0; background:linear-gradient(to top,var(--primary),var(--secondary)); opacity:.7; transition:.3s; cursor:pointer; }
-.chart-bar:hover { opacity:1; }
-
-.quick-action { display:flex; align-items:center; gap:.75rem; padding:1rem; border-radius:14px; background:rgba(255,255,255,.03); border:1px solid var(--border); text-decoration:none; color:var(--text); transition:.25s; }
-.quick-action:hover { background:var(--glass-hover); border-color:var(--primary); transform:translateX(-4px); }
-.quick-action-icon { width:42px; height:42px; border-radius:10px; display:grid; place-items:center; font-size:1.3rem; flex-shrink:0; }
-</style>
+<!-- Dashboard specific styles are now in style.css -->
 
 <!-- KPIs -->
 <div class="kpi-grid">

@@ -3,68 +3,7 @@ $page_title = 'ربط الواتساب — Baileys';
 require 'layout.php';
 ?>
 
-<style>
-.wa-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
-@media(max-width:900px){ .wa-grid{grid-template-columns:1fr} }
-
-.service-card {
-    background:var(--glass); border:1px solid var(--border); border-radius:20px;
-    padding:1.75rem; transition:.3s;
-}
-.service-card:hover { border-color:rgba(255,255,255,.15); }
-
-.service-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
-.service-title { display:flex; align-items:center; gap:.75rem; font-size:1.05rem; font-weight:700; }
-.service-icon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-size:1.3rem; }
-
-.indicator { display:inline-flex; align-items:center; gap:.5rem; padding:.35rem .85rem; border-radius:50px; font-size:.8rem; font-weight:600; }
-.ind-online  { background:rgba(16,185,129,.15); color:var(--success); border:1px solid rgba(16,185,129,.3); }
-.ind-offline { background:rgba(239,68,68,.15);  color:var(--danger);  border:1px solid rgba(239,68,68,.3);  }
-.ind-warn    { background:rgba(245,158,11,.15); color:var(--warning); border:1px solid rgba(245,158,11,.3); }
-.ind-check   { background:rgba(59,130,246,.15); color:var(--info);    border:1px solid rgba(59,130,246,.3);  }
-
-.pulse-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
-.pulse-green { background:var(--success); animation:pulseGreen 1.5s infinite; }
-.pulse-red   { background:var(--danger); }
-.pulse-yellow{ background:var(--warning); animation:pulseGreen 1.5s infinite; }
-@keyframes pulseGreen { 0%,100%{box-shadow:0 0 4px currentColor} 50%{box-shadow:0 0 12px currentColor} }
-
-.btn-run  { background:linear-gradient(135deg,var(--success),#059669); color:#fff; border:none; }
-.btn-stop { background:rgba(239,68,68,.15); color:var(--danger); border:1px solid rgba(239,68,68,.3); }
-.btn-run:hover  { filter:brightness(1.1); transform:translateY(-2px); }
-.btn-stop:hover { background:rgba(239,68,68,.25); }
-
-.terminal {
-    background:#050d1a; border:1px solid rgba(255,255,255,.07); border-radius:14px;
-    padding:1.25rem; font-family:'Cascadia Code','Consolas',monospace; font-size:.82rem;
-    min-height:80px; color:#94a3b8; overflow-y:auto; max-height:160px;
-    line-height:1.7;
-}
-.terminal .line-ok  { color:var(--success); }
-.terminal .line-err { color:var(--danger); }
-.terminal .line-info{ color:var(--info); }
-.terminal .line-warn{ color:var(--warning); }
-
-.qr-box {
-    background:#050d1a; border:2px dashed rgba(0,242,254,.3); border-radius:16px;
-    min-height:230px; display:grid; place-items:center; text-align:center; padding:1.5rem;
-    transition:.3s;
-}
-.qr-box.active { border-color:var(--primary); box-shadow:0 0 20px rgba(0,242,254,.1); }
-.qr-img { width:200px; height:200px; border-radius:12px; background:#fff; padding:8px; }
-
-.pairing-box { background:#050d1a; border:1px solid var(--border); border-radius:14px; padding:1.5rem; text-align:center; }
-.pairing-code {
-    font-size:2.5rem; font-weight:900; letter-spacing:.5rem; color:var(--primary);
-    font-family:monospace; background:rgba(0,242,254,.05); padding:1rem 2rem;
-    border-radius:12px; border:1px solid rgba(0,242,254,.2); display:inline-block; margin:1rem 0;
-}
-
-.step-badge { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--secondary)); color:#000; font-weight:800; display:grid; place-items:center; font-size:.85rem; flex-shrink:0; }
-
-.log-entry { padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,.03); display:flex; gap:.75rem; font-size:.82rem; }
-.log-dot { width:6px; height:6px; border-radius:50%; margin-top:.4rem; flex-shrink:0; }
-</style>
+<!-- WhatsApp specific styles are now in style.css -->
 
 <div class="page-header">
     <div>
@@ -135,14 +74,12 @@ require 'layout.php';
             <button class="btn btn-ghost btn-sm" onclick="pm2Action('status')">📋 الحالة</button>
         </div>
 
-        <div style="margin-top:1.25rem;padding:1rem;background:rgba(0,0,0,.2);border-radius:12px;font-size:.82rem">
+        <div class="terminal-code-block" style="margin-top:1.25rem">
             <div style="color:var(--muted);margin-bottom:.5rem">أوامر PM2 المرجعية:</div>
-            <div style="font-family:monospace;color:#7dd3fc;line-height:2">
-                pm2 start bot.js --name "delivery-bot"<br>
-                pm2 status<br>
-                pm2 logs delivery-bot<br>
-                pm2 save &amp;&amp; pm2 startup
-            </div>
+            pm2 start bot.js --name "delivery-bot"<br>
+            pm2 status<br>
+            pm2 logs delivery-bot<br>
+            pm2 save && pm2 startup
         </div>
     </div>
 
@@ -171,7 +108,7 @@ require 'layout.php';
             <button class="btn btn-ghost btn-sm" onclick="nodeAction('ping')">📡 Ping الخادم</button>
         </div>
 
-        <div style="margin-top:1.25rem;padding:1rem;background:rgba(0,0,0,.2);border-radius:12px">
+        <div class="terminal-code-block" style="margin-top:1.25rem">
             <div style="font-size:.82rem;color:var(--muted);margin-bottom:.5rem">الرابط الداخلي للاتصال:</div>
             <code style="color:var(--primary);font-size:.85rem;">http://localhost:3000/status</code>
         </div>
@@ -285,14 +222,14 @@ require 'layout.php';
 </div>
 
 <!-- Install Guide -->
-<div style="margin-top:1.5rem;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:20px;padding:2rem">
+<div style="margin-top:1.5rem;background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:2rem">
     <h2 style="font-size:1.1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem">
         <span>📖</span> دليل التثبيت السريع
     </h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem">
         <div>
             <div style="color:var(--primary);font-weight:700;margin-bottom:.75rem">① تثبيت Node.js و PM2</div>
-            <div style="background:#050d1a;border-radius:10px;padding:1rem;font-family:monospace;font-size:.8rem;color:#7dd3fc;line-height:2">
+            <div class="terminal-code-block">
                 # تحميل Node.js من nodejs.org<br>
                 npm install -g pm2<br>
                 pm2 --version
@@ -300,15 +237,15 @@ require 'layout.php';
         </div>
         <div>
             <div style="color:var(--success);font-weight:700;margin-bottom:.75rem">② تثبيت بوت Baileys</div>
-            <div style="background:#050d1a;border-radius:10px;padding:1rem;font-family:monospace;font-size:.8rem;color:#7dd3fc;line-height:2">
+            <div class="terminal-code-block">
                 cd C:\xampp\htdocs\Delivery\bot<br>
-                npm init -y<br>
-                npm install @whiskeysockets/baileys
+                npm install<br>
+                # تأكد من إعداد ملف .env أولاً
             </div>
         </div>
         <div>
             <div style="color:var(--accent);font-weight:700;margin-bottom:.75rem">③ تشغيل مع PM2</div>
-            <div style="background:#050d1a;border-radius:10px;padding:1rem;font-family:monospace;font-size:.8rem;color:#7dd3fc;line-height:2">
+            <div class="terminal-code-block">
                 pm2 start bot.js --name delivery-bot<br>
                 pm2 save<br>
                 pm2 startup
