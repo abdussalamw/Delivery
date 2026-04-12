@@ -1,9 +1,9 @@
 <?php
 // إعدادات الاتصال بقاعدة بيانات PostgreSQL
-$host = 'localhost';
-$db   = 'delivery_db';     // اسم قاعدة البيانات
-$user = 'postgres';        // اسم المستخدم
-$pass = '123456';          // كلمة المرور (قم بتغييرها إن لزم الأمر)
+$host = getenv('DB_HOST') ?: 'localhost';
+$db   = getenv('DB_NAME') ?: 'delivery_db';
+$user = getenv('DB_USER') ?: 'postgres';
+$pass = getenv('DB_PASS') ?: '123456';
 $port = '5432';
 
 $dsn = "pgsql:host=$host;port=$port;dbname=$db;options='--client_encoding=UTF8'";

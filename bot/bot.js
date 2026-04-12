@@ -26,7 +26,7 @@ let pairingCodePending = null;
 let messageBuffer = {}; // تجميع رسائل العميل لفترة 45 ثانية
 
 // ====== الاتصال بقاعدة البيانات PHP (عبر HTTP داخلي) ======
-const DB_WEBHOOK = 'http://localhost/Delivery/webhook_handler.php';
+const DB_WEBHOOK = process.env.WEBHOOK_URL || 'http://localhost/Delivery/webhook_handler.php';
 
 // ====== تهيئة البوت ======
 async function startBot(usePairing = false, pairingPhone = null) {

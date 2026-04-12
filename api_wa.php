@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 $action = $_GET['action'] ?? 'status';
-$NODE_URL = 'http://localhost:3000';
+$NODE_URL = getenv('BOT_URL') ?: 'http://localhost:3000';
 
 function call_bot($endpoint, $method='GET', $data=null, $timeout=5) {
     $ch = curl_init($endpoint);

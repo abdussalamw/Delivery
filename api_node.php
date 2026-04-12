@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 $action = $_GET['action'] ?? 'check';
 $NODE_PORT = 3000;
-$NODE_HOST = 'localhost';
+$NODE_HOST = getenv('BOT_HOST') ?: 'localhost';
 
 function check_node($host, $port) {
     $fp = @fsockopen($host, $port, $errno, $errstr, 3);
