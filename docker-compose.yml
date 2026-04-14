@@ -7,14 +7,14 @@ services:
       dockerfile: Dockerfile
     container_name: delivery_php
     ports:
-      - "80:80"
+      - "8090:80"
     volumes:
       - ./:/var/www/html/
     environment:
       - DB_HOST=db
       - DB_NAME=delivery_db
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASS=${DB_PASS:-123456}
+      - DB_USER=${DB_USER:-delivery_user}
+      - DB_PASS=${DB_PASS:-Delivery@2026}
       # Evolution API
       - EVO_URL=http://evolution:8080
       - EVO_KEY=${EVO_KEY:-dlv-evo-K9x2mP8nQ4rT7wJ3vL5}
@@ -27,11 +27,11 @@ services:
     image: postgres:16-alpine
     container_name: delivery_db_container
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=delivery_db
-      - POSTGRES_USER=${DB_USER:-postgres}
-      - POSTGRES_PASSWORD=${DB_PASS:-123456}
+      - POSTGRES_USER=${DB_USER:-delivery_user}
+      - POSTGRES_PASSWORD=${DB_PASS:-Delivery@2026}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./delivery_system_schema.sql:/docker-entrypoint-initdb.d/init.sql
