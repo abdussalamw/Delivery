@@ -52,11 +52,22 @@ services:
       - WEBHOOK_GLOBAL_ENABLED=false
       - DEL_INSTANCE=false
       - LOG_LEVEL=ERROR
-      # Database — PostgreSQL (نفس حاوية قاعدة البيانات الموجودة)
+      # Database — PostgreSQL
       - DATABASE_PROVIDER=postgresql
       - DATABASE_CONNECTION_URI=postgresql://${DB_USER:-delivery_user}:${DB_PASS:-Delivery@2026}@db:5432/evolution_db
+      # Cache — Redis
+      - CACHE_PROVIDER=redis
+      - CACHE_REDIS_HOST=redis
+      - CACHE_REDIS_PORT=6379
+      - CACHE_REDIS_DB=0
     depends_on:
       - db
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: delivery_redis
     restart: unless-stopped
 
 volumes:
