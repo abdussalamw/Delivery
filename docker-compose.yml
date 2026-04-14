@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     container_name: delivery_php
@@ -15,14 +15,17 @@ services:
       - DB_NAME=delivery_db
       - DB_USER=${DB_USER:-postgres}
       - DB_PASS=${DB_PASS:-123456}
-      - BOT_HOST=bot
-      - BOT_URL=http://bot:3000
+      # Evolution API
+      - EVO_URL=http://evolution:8080
+      - EVO_KEY=${EVO_KEY:-dlv-evo-K9x2mP8nQ4rT7wJ3vL5}
+      - EVO_INSTANCE=${EVO_INSTANCE:-delivery}
     depends_on:
       - db
+      - evolution
 
   db:
     image: postgres:16-alpine
-    container_name: delivery_db
+    container_name: delivery_db_container
     ports:
       - "5432:5432"
     environment:
@@ -31,24 +34,27 @@ services:
       - POSTGRES_PASSWORD=${DB_PASS:-123456}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # سيقوم Docker تلقائياً بإنشاء الجداول والبيانات التجريبية عند أول تشغيل للقاعدة
       - ./delivery_system_schema.sql:/docker-entrypoint-initdb.d/init.sql
 
-  bot:
-    build:
-      context: ./bot
-      dockerfile: Dockerfile
-    container_name: delivery_bot
+  evolution:
+    image: atendai/evolution-api:latest
+    container_name: delivery_evolution
     ports:
-      - "3000:3000"
+      - "8080:8080"
     volumes:
-      - ./bot:/app
-      - /app/node_modules # لتجاهل تركيب مجلد local
+      - evolution_store:/evolution/store
+      - evolution_instances:/evolution/instances
     environment:
-      - WEBHOOK_URL=http://web/webhook_handler.php
+      - SERVER_URL=http://localhost:8080
+      - AUTHENTICATION_TYPE=apikey
+      - AUTHENTICATION_API_KEY=${EVO_KEY:-dlv-evo-K9x2mP8nQ4rT7wJ3vL5}
+      - QRCODE_LIMIT=30
+      - WEBHOOK_GLOBAL_ENABLED=false
+      - DEL_INSTANCE=false
+      - LOG_LEVEL=ERROR
     restart: unless-stopped
-    depends_on:
-      - web
 
 volumes:
   pgdata:
+  evolution_store:
+  evolution_instances:
