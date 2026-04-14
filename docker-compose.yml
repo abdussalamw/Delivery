@@ -52,6 +52,11 @@ services:
       - WEBHOOK_GLOBAL_ENABLED=false
       - DEL_INSTANCE=false
       - LOG_LEVEL=ERROR
+      # Database — PostgreSQL (نفس حاوية قاعدة البيانات الموجودة)
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://${DB_USER:-delivery_user}:${DB_PASS:-Delivery@2026}@db:5432/evolution_db
+    depends_on:
+      - db
     restart: unless-stopped
 
 volumes:
