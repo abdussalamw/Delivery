@@ -37,7 +37,7 @@ services:
       - ./delivery_system_schema.sql:/docker-entrypoint-initdb.d/init.sql
 
   evolution:
-    image: atendai/evolution-api:latest
+    image: evoapicloud/evolution-api:latest
     container_name: delivery_evolution
     ports:
       - "8088:8080"
@@ -62,7 +62,7 @@ services:
     restart: unless-stopped
 
   evolution_manager:
-    image: atendai/evolution-manager-v2:latest
+    image: evoapicloud/evolution-manager:latest
     container_name: delivery_evolution_manager
     ports:
       - "8089:8080"
