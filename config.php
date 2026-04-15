@@ -19,4 +19,10 @@ try {
 } catch (\PDOException $e) {
     die("خطأ حرج: تعذر الاتصال بقاعدة بيانات PostgreSQL. تأكد من تشغيل الخدمة وصحة البيانات في ملف config.php. التفاصيل: " . $e->getMessage());
 }
+
+// إعدادات Evolution API
+define('EVO_URL', getenv('EVO_URL') ?: 'http://localhost:8088');
+define('EVO_KEY', getenv('EVO_KEY') ?: 'dlv-evo-K9x2mP8nQ4rT7wJ3vL5');
+define('EVO_INSTANCE', getenv('EVO_INSTANCE') ?: 'delivery');
+define('EVO_MANAGER_URL', 'http://' . $_SERVER['HTTP_HOST'] . ':8089');
 ?>

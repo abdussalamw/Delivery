@@ -75,6 +75,9 @@ require_once __DIR__ . '/config.php';
             <a href="whatsapp.php" class="nav-item <?= $current_page=='whatsapp'?'active':'' ?>">
                 <span class="nav-icon">💬</span> ربط الواتساب
             </a>
+            <a href="<?= EVO_MANAGER_URL ?>" target="_blank" class="nav-item">
+                <span class="nav-icon">🖥️</span> لوحة Evolution
+            </a>
             <a href="settings.php" class="nav-item <?= $current_page=='settings'?'active':'' ?>">
                 <span class="nav-icon">⚙️</span> الإعدادات
             </a>

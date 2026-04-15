@@ -61,6 +61,17 @@ services:
       - db
     restart: unless-stopped
 
+  evolution_manager:
+    image: atendai/evolution-manager-v2:latest
+    container_name: delivery_evolution_manager
+    ports:
+      - "8089:8080"
+    environment:
+      - EVOLUTION_API_URL=http://evolution:8080
+    depends_on:
+      - evolution
+    restart: unless-stopped
+
 volumes:
   pgdata:
   evolution_store:
