@@ -67,7 +67,8 @@ services:
     ports:
       - "8089:8080"
     environment:
-      - EVOLUTION_API_URL=http://evolution:8080
+      - EVOLUTION_API_URL=https://delivery.3ezit.com:8088
+      - GLOBAL_APIKEY=${EVO_KEY:-dlv-evo-K9x2mP8nQ4rT7wJ3vL5}
     depends_on:
       - evolution
     restart: unless-stopped
